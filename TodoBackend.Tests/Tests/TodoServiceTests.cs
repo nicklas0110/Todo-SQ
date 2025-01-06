@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using TodoBackend.Data;
 using TodoBackend.Services;
 using TodoBackend.Models;
+using TodoBackend.Repositories;
 
 namespace TodoBackend.Tests
 {
@@ -11,6 +12,7 @@ namespace TodoBackend.Tests
     {
         private readonly TodoDbContext _context;
         private readonly TodoService _service;
+        private readonly TodoRepository _repository;
 
         public TodoServiceTests()
         {
@@ -18,7 +20,8 @@ namespace TodoBackend.Tests
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                 .Options;
             _context = new TodoDbContext(options);
-            _service = new TodoService(_context);
+            _repository = new TodoRepository(_context);
+            _service = new TodoService(_repository);
         }
 
         // Tests that creating a new todo sets all required fields

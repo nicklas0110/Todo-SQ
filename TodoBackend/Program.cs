@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using TodoBackend.Data;
 using TodoBackend.Services;
 using System.Text.Json.Serialization;
+using TodoBackend.Repositories;
 
 namespace TodoBackend;
 
@@ -29,6 +30,7 @@ public class Program
         // Add Services
         builder.Services.AddScoped<ITodoService, TodoService>();
         builder.Services.AddScoped<ITaskAnalyzer, TaskAnalyzer>();
+        builder.Services.AddScoped<ITodoRepository, TodoRepository>();
 
         // Add CORS
         builder.Services.AddCors(options =>

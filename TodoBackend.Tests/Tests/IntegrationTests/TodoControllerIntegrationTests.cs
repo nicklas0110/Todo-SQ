@@ -7,7 +7,10 @@ using Microsoft.Extensions.DependencyInjection;
 using TodoBackend.Data;
 using TodoBackend.DTOs;
 using TodoBackend.Models;
+using TodoBackend.Repositories;
+using TodoBackend.Services;
 using Xunit;
+using Moq;
 
 namespace TodoBackend.Tests.IntegrationTests
 {
@@ -18,10 +21,12 @@ namespace TodoBackend.Tests.IntegrationTests
         private readonly WebApplicationFactory<Program> _factory;
         private readonly IServiceScope _scope;
         private readonly TodoDbContext _context;
+        private readonly Mock<ITodoRepository> _mockRepo;
 
         public TodoControllerIntegrationTests(WebApplicationFactory<Program> factory)
         {
             var dbName = $"TestingDb_{Guid.NewGuid()}";
+            _mockRepo = new Mock<ITodoRepository>();
             
             _factory = factory.WithWebHostBuilder(builder =>
             {
@@ -39,14 +44,49 @@ namespace TodoBackend.Tests.IntegrationTests
                     {
                         options.UseInMemoryDatabase(dbName);
                     });
+
+                    services.AddScoped<ITodoRepository>(sp => _mockRepo.Object);
                 });
             });
 
             _client = _factory.CreateClient();
-            
-            // Create a scope to resolve the context
             _scope = _factory.Services.CreateScope();
             _context = _scope.ServiceProvider.GetRequiredService<TodoDbContext>();
+
+            // Setup all mock behaviors
+            _mockRepo.Setup(r => r.GetAllAsync())
+                    .ReturnsAsync(() => _context.Todos.ToList());
+            
+            _mockRepo.Setup(r => r.GetByIdAsync(It.IsAny<int>()))
+                    .ReturnsAsync((int id) => _context.Todos.FirstOrDefault(t => t.Id == id));
+            
+            _mockRepo.Setup(r => r.CreateAsync(It.IsAny<Todo>()))
+                    .ReturnsAsync((Todo todo) => 
+                    {
+                        _context.Todos.Add(todo);
+                        _context.SaveChanges();
+                        return todo;
+                    });
+            
+            _mockRepo.Setup(r => r.UpdateAsync(It.IsAny<Todo>()))
+                    .ReturnsAsync((Todo todo) => 
+                    {
+                        var existing = _context.Todos.Find(todo.Id);
+                        if (existing == null) return null;
+                        _context.Entry(existing).CurrentValues.SetValues(todo);
+                        _context.SaveChanges();
+                        return existing;
+                    });
+            
+            _mockRepo.Setup(r => r.DeleteAsync(It.IsAny<int>()))
+                    .ReturnsAsync((int id) => 
+                    {
+                        var todo = _context.Todos.Find(id);
+                        if (todo == null) return false;
+                        _context.Todos.Remove(todo);
+                        _context.SaveChanges();
+                        return true;
+                    });
         }
 
         [Fact]
