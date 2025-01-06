@@ -46,4 +46,10 @@ export class TodoListComponent implements OnInit {
       this.loadTodos();
     });
   }
+
+  onUpdatePriority(event: {id: number, priority: Priority}): void {
+    this.todoService.updatePriority(event.id, event.priority).subscribe(() => {
+      this.loadTodos();
+    });
+  }
 }
