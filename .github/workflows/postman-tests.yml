@@ -1,0 +1,47 @@
+name: Postman API Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      
+      # Start your API (adjust as needed)
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '8.0.x'
+          
+      - name: Start API
+        run: |
+          dotnet build
+          dotnet run --project TodoBackend/TodoBackend.csproj &
+          sleep 10 # Wait for API to start
+          
+      # Install Newman (Postman CLI)
+      - name: Install Newman
+        run: |
+          npm install -g newman
+          npm install -g newman-reporter-htmlextra
+          
+      # Run Postman Tests
+      - name: Run API Tests
+        run: |
+          newman run TodoAPI.postman_collection.json \
+            -e TodoAPI.postman_environment.json \
+            -r cli,htmlextra \
+            --reporter-htmlextra-export testResults/htmlreport.html
+            
+      # Upload Test Results
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: api-test-results
+          path: testResults/ 

@@ -1,0 +1,11 @@
+{
+  "name": "todo-api-tests",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "./run-api-tests.sh"
+  },
+  "devDependencies": {
+    "newman": "^5.3.2",
+    "newman-reporter-htmlextra": "^1.22.11"
+  }
+} 

@@ -1,0 +1,142 @@
+{
+    "info": {
+        "name": "Todo API Tests",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Create Todo",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Status code is 201 Created\", function () {",
+                            "    pm.response.to.have.status(201);",
+                            "});",
+                            "",
+                            "pm.test(\"Response has correct structure\", function () {",
+                            "    const todo = pm.response.json();",
+                            "    pm.expect(todo).to.have.property('id');",
+                            "    pm.expect(todo).to.have.property('title');",
+                            "    pm.expect(todo).to.have.property('priority');",
+                            "    pm.expect(todo).to.have.property('createdAt');",
+                            "});",
+                            "",
+                            "pm.test(\"Todo data is correct\", function () {",
+                            "    const todo = pm.response.json();",
+                            "    pm.expect(todo.title).to.eql(\"Test Todo\");",
+                            "    pm.expect(todo.priority).to.eql(\"Medium\");",
+                            "    // Store ID for later tests",
+                            "    pm.collectionVariables.set(\"todoId\", todo.id);",
+                            "});"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"title\": \"Test Todo\",\n    \"priority\": \"Medium\"\n}"
+                },
+                "url": "{{baseUrl}}/api/todos"
+            }
+        },
+        {
+            "name": "Get Todo",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Status code is 200 OK\", function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test(\"Todo matches created todo\", function () {",
+                            "    const todo = pm.response.json();",
+                            "    pm.expect(todo.id).to.eql(parseInt(pm.collectionVariables.get(\"todoId\")));",
+                            "    pm.expect(todo.title).to.eql(\"Test Todo\");",
+                            "});"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "method": "GET",
+                "url": "{{baseUrl}}/api/todos/{{todoId}}"
+            }
+        },
+        {
+            "name": "Update Todo Title",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Status code is 200 OK\", function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test(\"Title is updated correctly\", function () {",
+                            "    const todo = pm.response.json();",
+                            "    pm.expect(todo.title).to.eql(\"Updated Title\");",
+                            "    pm.expect(todo.id).to.eql(parseInt(pm.collectionVariables.get(\"todoId\")));",
+                            "});"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "method": "PUT",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"title\": \"Updated Title\"\n}"
+                },
+                "url": "{{baseUrl}}/api/todos/{{todoId}}/title"
+            }
+        },
+        {
+            "name": "Delete Todo",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Status code is 204 No Content\", function () {",
+                            "    pm.response.to.have.status(204);",
+                            "});",
+                            "",
+                            "// Verify todo is deleted by trying to get it",
+                            "pm.sendRequest({",
+                            "    url: pm.variables.get(\"baseUrl\") + \"/api/todos/\" + pm.variables.get(\"todoId\"),",
+                            "    method: \"GET\"",
+                            "}, function (err, res) {",
+                            "    pm.test(\"Todo should not exist\", function () {",
+                            "        pm.expect(res.code).to.eql(404);",
+                            "    });",
+                            "});"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "method": "DELETE",
+                "url": "{{baseUrl}}/api/todos/{{todoId}}"
+            }
+        }
+    ]
+} 

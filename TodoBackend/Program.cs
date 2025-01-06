@@ -35,10 +35,10 @@ public class Program
         // Add CORS
         builder.Services.AddCors(options =>
         {
-            options.AddPolicy("AllowAngularApp",
+            options.AddPolicy("AllowAngularAndPostman",
                 builder =>
                 {
-                    builder.WithOrigins("http://localhost:4200")
+                    builder.WithOrigins("http://localhost:4200", "http://localhost:5234")
                            .AllowAnyHeader()
                            .AllowAnyMethod();
                 });
@@ -54,7 +54,7 @@ public class Program
         }
 
         app.UseHttpsRedirection();
-        app.UseCors("AllowAngularApp");
+        app.UseCors("AllowAngularAndPostman");
         app.UseAuthorization();
         app.MapControllers();
 
