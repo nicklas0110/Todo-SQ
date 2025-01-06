@@ -1,10 +1,14 @@
 import { TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { TodoService } from './services/todo.service';
+import { TodoListComponent } from './components/todo-list/todo-list.component';
 
 describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AppComponent],
+      imports: [AppComponent, HttpClientTestingModule, TodoListComponent],
+      providers: [TodoService]
     }).compileComponents();
   });
 
@@ -14,16 +18,10 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have the 'TodoFrontend' title`, () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-    expect(app.title).toEqual('TodoFrontend');
-  });
-
-  it('should render title', () => {
+  it('should render todo list', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, TodoFrontend');
+    expect(compiled.querySelector('app-todo-list')).toBeTruthy();
   });
 });

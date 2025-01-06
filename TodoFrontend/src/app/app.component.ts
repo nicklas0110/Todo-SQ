@@ -14,4 +14,6 @@ import { TodoListComponent } from './components/todo-list/todo-list.component';
   `,
   styleUrls: ['./app.component.css']
 })
-export class AppComponent {}
+export class AppComponent {
+  title = 'TodoFrontend';
+}
