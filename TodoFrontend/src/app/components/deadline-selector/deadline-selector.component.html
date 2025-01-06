@@ -1,0 +1,17 @@
+<div class="deadline-selector" [class.has-deadline]="deadline">
+  <ng-container *ngIf="!isEditing">
+    <span class="deadline-display" [class]="getDeadlineClass()" (click)="toggleEdit()">
+      {{ deadline ? (deadline | date:'shortDate') : '📅' }}
+    </span>
+  </ng-container>
+  <ng-container *ngIf="isEditing">
+    <input 
+      type="date" 
+      [value]="selectedDate"
+      (change)="onDateChange($event)"
+    />
+    <button class="clear-btn" (click)="clearDeadline()">
+      <mat-icon>delete</mat-icon>
+    </button>
+  </ng-container>
+</div> 

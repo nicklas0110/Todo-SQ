@@ -8,7 +8,9 @@
       placeholder="Add new todo..."
       (keyup.enter)="addTodo()"
     />
-    <button (click)="addTodo()">Add</button>
+    <button (click)="addTodo()">
+      <mat-icon>add</mat-icon>
+    </button>
   </div>
 
   <div class="todo-list">
@@ -18,6 +20,8 @@
         (toggleTodo)="onToggleTodo($event)"
         (deleteTodo)="onDeleteTodo($event)"
         (updatePriority)="onUpdatePriority($event)"
+        (updateDeadline)="onUpdateDeadline($event)"
+        (updateTitle)="onUpdateTitle($event)"
       />
     }
   </div>

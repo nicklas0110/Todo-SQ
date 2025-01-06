@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using TodoBackend.Models;
 using TodoBackend.Services;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace TodoBackend.Controllers
 {
@@ -119,9 +120,65 @@ namespace TodoBackend.Controllers
             }
         }
 
+        [HttpPut("{id}/deadline")]
+        public async Task<ActionResult<Todo>> UpdateDeadline(int id, [FromBody] DeadlineUpdateDto deadlineUpdate)
+        {
+            try
+            {
+                var todo = await _todoService.GetTodoByIdAsync(id);
+                if (todo == null)
+                    return NotFound(new { error = "Todo not found" });
+
+                todo.Deadline = deadlineUpdate.Deadline;
+                todo.UpdatedAt = DateTime.UtcNow;
+                var updatedTodo = await _todoService.UpdateTodoAsync(id, todo);
+                
+                return Ok(updatedTodo);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating todo deadline");
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
+        [HttpPut("{id}/title")]
+        public async Task<ActionResult<Todo>> UpdateTitle(int id, [FromBody] TitleUpdateDto titleUpdate)
+        {
+            try
+            {
+                var todo = await _todoService.GetTodoByIdAsync(id);
+                if (todo == null)
+                    return NotFound(new { error = "Todo not found" });
+
+                todo.Title = titleUpdate.Title;
+                todo.UpdatedAt = DateTime.UtcNow;
+                var updatedTodo = await _todoService.UpdateTodoAsync(id, todo);
+                
+                return Ok(updatedTodo);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating todo title");
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
         public class PriorityUpdateDto
         {
             public Priority Priority { get; set; }
+        }
+
+        public class DeadlineUpdateDto
+        {
+            [JsonPropertyName("deadline")]
+            public DateTime? Deadline { get; set; }
+        }
+
+        public class TitleUpdateDto
+        {
+            [JsonPropertyName("title")]
+            public string Title { get; set; } = string.Empty;
         }
     }
 } 

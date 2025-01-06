@@ -15,7 +15,11 @@ namespace TodoBackend.Services
 
         public async Task<IEnumerable<Todo>> GetAllTodosAsync()
         {
-            return await _context.Todos.ToListAsync();
+            return await _context.Todos
+                .OrderByDescending(t => t.Priority)  // Highest priority first
+                .ThenBy(t => t.Deadline)            // Then by deadline if priority is equal
+                .ThenByDescending(t => t.CreatedAt) // Then by creation date (newest first) if both priority and deadline are equal
+                .ToListAsync();
         }
 
         public async Task<Todo?> GetTodoByIdAsync(int id)

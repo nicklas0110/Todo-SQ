@@ -7,10 +7,28 @@
     (change)="onToggle()"
   />
   <div class="todo-content">
-    <span class="title">{{ todo.title }}</span>
-    <span class="deadline" *ngIf="todo.deadline">
-      Due: {{ todo.deadline | date:'short' }}
-    </span>
+    <ng-container *ngIf="!isEditingTitle">
+      <span class="title" (click)="toggleTitleEdit()">{{ todo.title }}</span>
+    </ng-container>
+    <ng-container *ngIf="isEditingTitle">
+      <div class="title-edit-container">
+        <input
+          #titleInput
+          type="text"
+          class="title-input"
+          [value]="todo.title"
+          maxlength="25"
+          (input)="onTitleInput(titleInput.value)"
+          (keyup.enter)="onTitleChange(titleInput.value)"
+          (keyup.escape)="toggleTitleEdit()"
+        />
+        <div class="char-count" [class.char-limit-reached]="currentTitleLength >= 25">
+          {{currentTitleLength}}/25
+        </div>
+        <button class="confirm-btn" (click)="onTitleChange(titleInput.value)">✓</button>
+        <button class="cancel-btn" (click)="toggleTitleEdit()">✕</button>
+      </div>
+    </ng-container>
     <ng-container *ngIf="!isEditingPriority">
       <span class="priority" (click)="togglePriorityEdit()">{{ getPriorityLabel() }}</span>
     </ng-container>
@@ -20,6 +38,12 @@
         (priorityChange)="onPriorityChange($event)"
       ></app-priority-selector>
     </ng-container>
+    <app-deadline-selector
+      [deadline]="todo.deadline"
+      (deadlineChange)="onDeadlineChange($event)"
+    ></app-deadline-selector>
   </div>
-  <button class="delete-btn" (click)="onDelete()">Delete</button>
+  <button class="delete-btn" (click)="onDelete()">
+    <mat-icon>delete</mat-icon>
+  </button>
 </div>

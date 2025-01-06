@@ -62,4 +62,24 @@ export class TodoService {
   deleteTodo(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
+
+  updateDeadline(id: number, deadline?: Date): Observable<Todo> {
+    return this.http.put<Todo>(`${this.apiUrl}/${id}/deadline`, { deadline }).pipe(
+      map(todo => ({
+        ...todo,
+        priority: typeof todo.priority === 'string' ? stringToPriority(todo.priority as string) : todo.priority,
+        deadline: todo.deadline ? new Date(todo.deadline) : undefined
+      }))
+    );
+  }
+
+  updateTitle(id: number, title: string): Observable<Todo> {
+    return this.http.put<Todo>(`${this.apiUrl}/${id}/title`, { title }).pipe(
+      map(todo => ({
+        ...todo,
+        priority: typeof todo.priority === 'string' ? stringToPriority(todo.priority as string) : todo.priority,
+        deadline: todo.deadline ? new Date(todo.deadline) : undefined
+      }))
+    );
+  }
 }
