@@ -110,35 +110,6 @@
             }
         },
         {
-            "name": "Delete Todo",
-            "event": [
-                {
-                    "listen": "test",
-                    "script": {
-                        "exec": [
-                            "pm.test(\"Status code is 204 No Content\", function () {",
-                            "    pm.response.to.have.status(204);",
-                            "});",
-                            "",
-                            "// Verify todo is deleted by trying to get it",
-                            "pm.sendRequest({",
-                            "    url: pm.variables.get(\"baseUrl\") + \"/api/todos/\" + pm.variables.get(\"todoId\"),",
-                            "    method: \"GET\"",
-                            "}, function (err, res) {",
-                            "    pm.test(\"Todo should not exist\", function () {",
-                            "        pm.expect(res.code).to.eql(404);",
-                            "    });",
-                            "});"
-                        ]
-                    }
-                }
-            ],
-            "request": {
-                "method": "DELETE",
-                "url": "{{baseUrl}}/api/todos/{{todoId}}"
-            }
-        },
-        {
             "name": "Update Todo Priority",
             "event": [
                 {
@@ -223,6 +194,35 @@
                     "raw": "{\n    \"deadline\": \"{{$isoTimestamp}}\"\n}"
                 },
                 "url": "{{baseUrl}}/api/todos/{{todoId}}/deadline"
+            }
+        },
+        {
+            "name": "Delete Todo",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Status code is 204 No Content\", function () {",
+                            "    pm.response.to.have.status(204);",
+                            "});",
+                            "",
+                            "// Verify todo is deleted by trying to get it",
+                            "pm.sendRequest({",
+                            "    url: pm.variables.get(\"baseUrl\") + \"/api/todos/\" + pm.variables.get(\"todoId\"),",
+                            "    method: \"GET\"",
+                            "}, function (err, res) {",
+                            "    pm.test(\"Todo should not exist\", function () {",
+                            "        pm.expect(res.code).to.eql(404);",
+                            "    });",
+                            "});"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "method": "DELETE",
+                "url": "{{baseUrl}}/api/todos/{{todoId}}"
             }
         },
         {
