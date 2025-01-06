@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using TodoBackend.Models;
 using TodoBackend.Services;
 using TodoBackend.DTOs;
+using System.ComponentModel.DataAnnotations;
 
 namespace TodoBackend.Controllers
 {
@@ -35,6 +36,11 @@ namespace TodoBackend.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateTodo([FromBody] CreateTodoDTO dto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             var todo = new Todo
             {
                 Title = dto.Title,

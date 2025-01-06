@@ -21,6 +21,8 @@ namespace TodoBackend.Tests
             _service = new TodoService(_context);
         }
 
+        // Tests that creating a new todo sets all required fields
+        // This verifies the basic creation functionality and proper initialization
         [Fact]
         public async Task CreateTodoAsync_ShouldCreateNewTodo()
         {
@@ -37,6 +39,8 @@ namespace TodoBackend.Tests
             Assert.NotEqual(default(DateTime), result.CreatedAt);
         }
 
+        // Tests that the service returns all todos in the database
+        // This verifies the basic retrieval functionality
         [Fact]
         public async Task GetAllTodosAsync_ShouldReturnAllTodos()
         {
@@ -51,6 +55,8 @@ namespace TodoBackend.Tests
             Assert.Equal(2, todos.Count());
         }
 
+        // Tests that updating an existing todo changes all specified fields
+        // This verifies the update functionality maintains data integrity
         [Fact]
         public async Task UpdateTodoAsync_ShouldUpdateExistingTodo()
         {
@@ -74,6 +80,8 @@ namespace TodoBackend.Tests
             Assert.NotNull(result.UpdatedAt);
         }
 
+        // Tests that deleting a todo removes it from the database
+        // This verifies both the delete operation and subsequent queries
         [Fact]
         public async Task DeleteTodoAsync_ShouldDeleteExistingTodo()
         {
@@ -90,6 +98,8 @@ namespace TodoBackend.Tests
             Assert.Empty(todos);
         }
 
+        // Tests that todos are returned in priority order (Critical -> High -> Low)
+        // This verifies the ordering functionality of the service
         [Fact]
         public async Task GetAllTodosAsync_ShouldReturnTodosInPriorityOrder()
         {
@@ -108,6 +118,8 @@ namespace TodoBackend.Tests
             Assert.Equal(Priority.Low, todos[2].Priority);
         }
 
+        // Tests that todos with equal priorities are ordered by deadline
+        // This verifies the secondary sorting criteria works correctly
         [Fact]
         public async Task GetAllTodosAsync_ShouldOrderByDeadlineWhenPrioritiesEqual()
         {
@@ -135,6 +147,8 @@ namespace TodoBackend.Tests
             Assert.Equal("Later Deadline", todos[1].Title);
         }
 
+        // Tests that updating only the title doesn't affect other fields
+        // This verifies the partial update functionality maintains data integrity
         [Fact]
         public async Task UpdateTodoTitle_ShouldUpdateTitleOnly()
         {
@@ -163,6 +177,8 @@ namespace TodoBackend.Tests
             Assert.Equal(todo.Completed, result.Completed);
         }
 
+        // Tests that updating only the deadline doesn't affect other fields
+        // This verifies the partial update functionality for deadline
         [Fact]
         public async Task UpdateTodoDeadline_ShouldUpdateDeadlineOnly()
         {
@@ -189,6 +205,8 @@ namespace TodoBackend.Tests
             Assert.Equal(newDeadline.Date, result.Deadline?.Date);
         }
 
+        // Tests that updating only the priority doesn't affect other fields
+        // This verifies the partial update functionality for priority
         [Fact]
         public async Task UpdateTodoPriority_ShouldUpdatePriorityOnly()
         {
@@ -214,6 +232,8 @@ namespace TodoBackend.Tests
             Assert.Equal(Priority.Critical, result.Priority);
         }
 
+        // Tests that updating priority through dedicated method works correctly
+        // This verifies the specific priority update endpoint
         [Fact]
         public async Task UpdateTodoPriorityAsync_ShouldUpdatePriority()
         {
@@ -229,6 +249,8 @@ namespace TodoBackend.Tests
             Assert.Equal(Priority.High, result.Priority);
         }
 
+        // Tests that updating deadline through dedicated method works correctly
+        // This verifies the specific deadline update endpoint
         [Fact]
         public async Task UpdateTodoDeadlineAsync_ShouldUpdateDeadline()
         {
@@ -245,6 +267,8 @@ namespace TodoBackend.Tests
             Assert.Equal(newDeadline.Date, result.Deadline?.Date);
         }
 
+        // Tests that updating title through dedicated method works correctly
+        // This verifies the specific title update endpoint
         [Fact]
         public async Task UpdateTodoTitleAsync_ShouldUpdateTitle()
         {

@@ -19,6 +19,11 @@ namespace TodoBackend.Tests
             _now = DateTime.UtcNow;
         }
 
+        // Tests that only incomplete tasks with past deadlines are identified as overdue
+        // This verifies that:
+        // - Completed tasks are excluded even if deadline passed
+        // - Future deadlines are not included
+        // - Tasks without deadlines are not included
         [Fact]
         public void GetOverdueTasks_WithOverdueTasks_ReturnsOnlyOverdueTasks()
         {
@@ -39,10 +44,15 @@ namespace TodoBackend.Tests
             Assert.Equal(1, overdueTasks[0].Id);
         }
 
+        // Tests the completion rate calculation with different scenarios:
+        // - Empty list (0%)
+        // - Half completed (50%)
+        // - All completed (100%)
+        // This verifies the percentage calculation works correctly for all cases
         [Theory]
-        [InlineData(0, 0)] // Empty list
-        [InlineData(2, 50)] // Half completed
-        [InlineData(4, 100)] // All completed
+        [InlineData(0, 0)]    // Empty list
+        [InlineData(2, 50)]   // Half completed
+        [InlineData(4, 100)]  // All completed
         public void CalculateCompletionRate_WithVariousScenarios_ReturnsExpectedRate(
             int completedCount, double expectedRate)
         {
@@ -64,6 +74,11 @@ namespace TodoBackend.Tests
             Assert.Equal(expectedRate, rate);
         }
 
+        // Tests that tasks are correctly prioritized based on both priority level and deadline
+        // This verifies that:
+        // - Critical priority tasks come first regardless of deadline
+        // - Tasks with same deadline are ordered by priority
+        // - All urgent tasks are included in correct order
         [Fact]
         public void GetTasksRequiringImediateAttention_WithVariousTasks_ReturnsCorrectPrioritizedList()
         {
@@ -85,6 +100,11 @@ namespace TodoBackend.Tests
             Assert.Equal(1, urgentTasks[2].Id); // Low priority with urgent deadline
         }
 
+        // Tests that the count of tasks for each priority level is correctly calculated
+        // This verifies that:
+        // - Tasks are properly grouped by priority
+        // - The count for each priority level is accurate
+        // - All priority levels are represented in the distribution
         [Fact]
         public void GetPriorityDistribution_WithVariousPriorities_ReturnsCorrectDistribution()
         {
