@@ -137,6 +137,126 @@
                 "method": "DELETE",
                 "url": "{{baseUrl}}/api/todos/{{todoId}}"
             }
+        },
+        {
+            "name": "Update Todo Priority",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Status code is 200 OK\", function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test(\"Priority is updated correctly\", function () {",
+                            "    const todo = pm.response.json();",
+                            "    pm.expect(todo.priority).to.eql(\"High\");",
+                            "    pm.expect(todo.id).to.eql(parseInt(pm.collectionVariables.get(\"todoId\")));",
+                            "});"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "method": "PUT",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"priority\": \"High\"\n}"
+                },
+                "url": "{{baseUrl}}/api/todos/{{todoId}}/priority"
+            }
+        },
+        {
+            "name": "Update Todo Deadline",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Status code is 200 OK\", function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test(\"Deadline is updated correctly\", function () {",
+                            "    const todo = pm.response.json();",
+                            "    pm.expect(todo).to.have.property('deadline');",
+                            "    pm.expect(todo.id).to.eql(parseInt(pm.collectionVariables.get(\"todoId\")));",
+                            "});",
+                            "",
+                            "pm.test(\"Cannot set past deadline\", function () {",
+                            "    const pastDate = new Date();",
+                            "    pastDate.setDate(pastDate.getDate() - 1);",
+                            "",
+                            "    pm.sendRequest({",
+                            "        url: pm.variables.get(\"baseUrl\") + \"/api/todos/\" + pm.variables.get(\"todoId\") + \"/deadline\",",
+                            "        method: \"PUT\",",
+                            "        header: { \"Content-Type\": \"application/json\" },",
+                            "        body: {",
+                            "            mode: \"raw\",",
+                            "            raw: JSON.stringify({ deadline: pastDate.toISOString() })",
+                            "        }",
+                            "    }, function (err, res) {",
+                            "        pm.expect(res.code).to.eql(400);",
+                            "    });",
+                            "});"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "method": "PUT",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"deadline\": \"{{$isoTimestamp}}\"\n}"
+                },
+                "url": "{{baseUrl}}/api/todos/{{todoId}}/deadline"
+            }
+        },
+        {
+            "name": "Get All Todos",
+            "event": [
+                {
+                    "listen": "test",
+                    "script": {
+                        "exec": [
+                            "pm.test(\"Status code is 200 OK\", function () {",
+                            "    pm.response.to.have.status(200);",
+                            "});",
+                            "",
+                            "pm.test(\"Response is an array\", function () {",
+                            "    const todos = pm.response.json();",
+                            "    pm.expect(Array.isArray(todos)).to.be.true;",
+                            "});",
+                            "",
+                            "pm.test(\"Todos have correct structure\", function () {",
+                            "    const todos = pm.response.json();",
+                            "    if (todos.length > 0) {",
+                            "        pm.expect(todos[0]).to.have.property('id');",
+                            "        pm.expect(todos[0]).to.have.property('title');",
+                            "        pm.expect(todos[0]).to.have.property('priority');",
+                            "    }",
+                            "});"
+                        ]
+                    }
+                }
+            ],
+            "request": {
+                "method": "GET",
+                "url": "{{baseUrl}}/api/todos"
+            }
         }
     ]
 } 
