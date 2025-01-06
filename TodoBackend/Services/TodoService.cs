@@ -81,5 +81,41 @@ namespace TodoBackend.Services
             todo.UpdatedAt = DateTime.UtcNow;
             return await _repository.UpdateAsync(todo);
         }
+
+        /// <summary>
+        /// Gets all overdue todos with complex filtering logic:
+        /// - Checks if todo has a deadline
+        /// - Checks if deadline is in the past
+        /// - Filters based on completion status
+        /// Uses explicit loop and conditions for better visibility of logic paths
+        /// </summary>
+        public async Task<List<Todo>> GetOverdueTodosAsync(bool includeCompleted = false)
+        {
+            var allTodos = await _repository.GetAllAsync();
+            var now = DateTime.UtcNow;
+            var overdueTodos = new List<Todo>();
+
+            foreach (var todo in allTodos)  // Loop through all todos
+            {
+                if (todo.Deadline.HasValue)  // First condition: Has deadline?
+                {
+                    if (todo.Deadline.Value < now)  // Second condition: Is deadline in past?
+                    {
+                        if (!todo.IsCompleted)  // Third condition: Is not completed?
+                        {
+                            overdueTodos.Add(todo);  // Path 1: Not completed overdue todos
+                        }
+                        else if (includeCompleted)  // Fourth condition: Include completed?
+                        {
+                            overdueTodos.Add(todo);  // Path 2: Completed overdue todos
+                        }
+                    }
+                    // Path 3: Future deadline (implicit skip)
+                }
+                // Path 4: No deadline (implicit skip)
+            }
+
+            return overdueTodos;
+        }
     }
 } 

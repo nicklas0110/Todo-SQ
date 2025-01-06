@@ -10,19 +10,13 @@ namespace TodoBackend.Data
         {
         }
 
-        public DbSet<Todo> Todos { get; set; }
+        public DbSet<Todo> Todos { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
-
-            modelBuilder.Entity<Todo>(entity =>
-            {
-                entity.HasKey(e => e.Id);
-                entity.Property(e => e.Title).IsRequired();
-                entity.Property(e => e.Priority).IsRequired();
-                entity.Property(e => e.CreatedAt).IsRequired();
-            });
+            modelBuilder.Entity<Todo>()
+                .Property(t => t.IsCompleted)
+                .HasDefaultValue(false);
         }
     }
 } 

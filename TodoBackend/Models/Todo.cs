@@ -35,5 +35,7 @@ namespace TodoBackend.Models
         
         [JsonPropertyName("priority")]
         public Priority Priority { get; set; }
+        
+        public bool IsCompleted { get; set; } = false;
     }
 } 

@@ -54,7 +54,7 @@
     <SingleHit>true</SingleHit>
     <ThresholdType>line,branch,method</ThresholdType>
     <ThresholdStat>minimum</ThresholdStat>
-    <Threshold>65</Threshold>
+    <Threshold>80</Threshold>
   </PropertyGroup>
 
 </Project> 
