@@ -10,11 +10,11 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       
       # Start your API (adjust as needed)
       - name: Setup .NET
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
           
@@ -41,7 +41,8 @@ jobs:
       # Upload Test Results
       - name: Upload Test Results
         if: always()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: api-test-results
-          path: testResults/ 
+          path: testResults/
+          retention-days: 30 
