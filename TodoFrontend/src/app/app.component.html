@@ -1,0 +1,13 @@
+<div class="container">
+  <h1>Todo App</h1>
+  <app-todo-form (addTodo)="addTodo($event)"></app-todo-form>
+  <div class="todo-list">
+    <app-todo-item
+      *ngFor="let todo of todos"
+      [todo]="todo"
+      (toggleTodo)="toggleTodo($event)"
+      (deleteTodo)="deleteTodo($event)"
+      (updatePriority)="onPriorityUpdate($event)"
+    ></app-todo-item>
+  </div>
+</div>

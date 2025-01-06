@@ -1,0 +1,6 @@
+<select [ngModel]="priority" (ngModelChange)="onPriorityChange($event)" class="priority-select">
+  <option [ngValue]="Priority.Low">Low</option>
+  <option [ngValue]="Priority.Medium">Medium</option>
+  <option [ngValue]="Priority.High">High</option>
+  <option [ngValue]="Priority.Critical">Critical</option>
+</select> 

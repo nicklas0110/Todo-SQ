@@ -1,0 +1,25 @@
+<div class="todo-item" 
+     [class.completed]="todo.completed" 
+     [class]="getPriorityClass()">
+  <input
+    type="checkbox"
+    [checked]="todo.completed"
+    (change)="onToggle()"
+  />
+  <div class="todo-content">
+    <span class="title">{{ todo.title }}</span>
+    <span class="deadline" *ngIf="todo.deadline">
+      Due: {{ todo.deadline | date:'short' }}
+    </span>
+    <ng-container *ngIf="!isEditingPriority">
+      <span class="priority" (click)="togglePriorityEdit()">{{ getPriorityLabel() }}</span>
+    </ng-container>
+    <ng-container *ngIf="isEditingPriority">
+      <app-priority-selector
+        [priority]="todo.priority"
+        (priorityChange)="onPriorityChange($event)"
+      ></app-priority-selector>
+    </ng-container>
+  </div>
+  <button class="delete-btn" (click)="onDelete()">Delete</button>
+</div>
