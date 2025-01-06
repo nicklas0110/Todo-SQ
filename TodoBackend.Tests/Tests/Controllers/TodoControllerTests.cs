@@ -21,22 +21,17 @@ public class TodoControllerTests
 
     /// <summary>
     /// Tests that updating a todo's priority with valid data succeeds.
-    /// Verifies:
-    /// 1. The controller returns an OK result
-    /// 2. The returned todo has the updated priority
-    /// 3. The service method was called with correct parameters
+    /// Verifies that the controller:
+    /// 1. Correctly passes the priority to the service
+    /// 2. Returns OK with the updated todo
+    /// 3. Maintains data integrity
     /// </summary>
     [Fact]
     public async Task UpdateTodoPriority_WithValidData_UpdatesPriority()
     {
         // Arrange
         var todo = new Todo { Id = 1, Title = "Test", Priority = Priority.Low };
-        var updatedTodo = new Todo 
-        { 
-            Id = 1, 
-            Title = "Test", 
-            Priority = Priority.High 
-        };
+        var updatedTodo = new Todo { Id = 1, Title = "Test", Priority = Priority.High };
         var dto = new PriorityUpdateDTO(Priority.High);
         _mockTodoService.Setup(s => s.UpdateTodoPriorityAsync(1, Priority.High))
             .ReturnsAsync(updatedTodo);
@@ -51,8 +46,28 @@ public class TodoControllerTests
     }
 
     /// <summary>
-    /// Tests that attempting to update priority of a non-existent todo returns NotFound.
-    /// Verifies proper error handling when the todo ID doesn't exist.
+    /// Tests input validation for priority updates.
+    /// Verifies that the controller properly handles null DTOs
+    /// by returning a BadRequest result with an error message.
+    /// This is important for API robustness.
+    /// </summary>
+    [Theory]
+    [InlineData(null)]
+    public async Task UpdateTodoPriority_WithNullDTO_ReturnsBadRequest(PriorityUpdateDTO? dto)
+    {
+        // Act
+        var result = await _controller.UpdateTodoPriority(1, dto);
+
+        // Assert
+        var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+        Assert.Equal("Priority update data is required", badRequestResult.Value);
+    }
+
+    /// <summary>
+    /// Tests error handling for non-existent todos.
+    /// Verifies that the controller returns NotFound when
+    /// attempting to update a todo that doesn't exist.
+    /// This ensures proper API error responses.
     /// </summary>
     [Fact]
     public async Task UpdateTodoPriority_WithInvalidId_ReturnsNotFound()
@@ -70,11 +85,11 @@ public class TodoControllerTests
     }
 
     /// <summary>
-    /// Tests that updating a todo's deadline with valid data succeeds.
-    /// Verifies:
-    /// 1. The controller returns an OK result
-    /// 2. The returned todo has the updated deadline
-    /// 3. The service method was called with correct parameters
+    /// Tests successful deadline updates.
+    /// Verifies that the controller:
+    /// 1. Accepts valid future dates
+    /// 2. Returns OK with updated todo
+    /// 3. Correctly updates the deadline
     /// </summary>
     [Fact]
     public async Task UpdateTodoDeadline_WithValidData_UpdatesDeadline()
@@ -82,12 +97,7 @@ public class TodoControllerTests
         // Arrange
         var deadline = DateTime.Now.AddDays(1);
         var todo = new Todo { Id = 1, Title = "Test" };
-        var updatedTodo = new Todo 
-        { 
-            Id = 1, 
-            Title = "Test", 
-            Deadline = deadline 
-        };
+        var updatedTodo = new Todo { Id = 1, Title = "Test", Deadline = deadline };
         var dto = new DeadlineUpdateDTO(deadline);
         _mockTodoService.Setup(s => s.UpdateTodoDeadlineAsync(1, deadline))
             .ReturnsAsync(updatedTodo);
@@ -102,31 +112,31 @@ public class TodoControllerTests
     }
 
     /// <summary>
-    /// Tests that attempting to update deadline of a non-existent todo returns NotFound.
-    /// Verifies proper error handling when the todo ID doesn't exist.
+    /// Tests input validation for deadline updates.
+    /// Verifies that the controller properly handles null DTOs
+    /// by returning a BadRequest result with an error message.
+    /// This ensures API stability.
     /// </summary>
-    [Fact]
-    public async Task UpdateTodoDeadline_WithInvalidId_ReturnsNotFound()
+    [Theory]
+    [InlineData(null)]
+    public async Task UpdateTodoDeadline_WithNullDTO_ReturnsBadRequest(DeadlineUpdateDTO? dto)
     {
-        // Arrange
-        var dto = new DeadlineUpdateDTO(DateTime.Now);
-        _mockTodoService.Setup(s => s.UpdateTodoDeadlineAsync(It.IsAny<int>(), It.IsAny<DateTime>()))
-            .ReturnsAsync((Todo?)null);
-
         // Act
-        var result = await _controller.UpdateTodoDeadline(999, dto);
+        var result = await _controller.UpdateTodoDeadline(1, dto);
 
         // Assert
-        Assert.IsType<NotFoundResult>(result);
+        var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+        Assert.Equal("Deadline update data is required", badRequestResult.Value);
     }
 
     /// <summary>
-    /// Tests that attempting to set a deadline in the past is handled appropriately.
-    /// Currently verifies that the service throws an ArgumentException for invalid dates.
-    /// Note: This test might need updating if we change to controller-level validation.
+    /// Tests business rule validation for deadlines.
+    /// Verifies that attempting to set a past deadline
+    /// results in an ArgumentException. This ensures
+    /// todos can only be scheduled for the future.
     /// </summary>
     [Fact]
-    public async Task UpdateTodoDeadline_WithPastDate_ReturnsBadRequest()
+    public async Task UpdateTodoDeadline_WithPastDate_HandlesPastDateValidation()
     {
         // Arrange
         var pastDate = DateTime.Now.AddDays(-1);
@@ -136,19 +146,30 @@ public class TodoControllerTests
         _mockTodoService.Setup(s => s.UpdateTodoDeadlineAsync(1, pastDate))
             .ThrowsAsync(new ArgumentException("Deadline cannot be in the past"));
 
-        try
-        {
-            // Act
-            var result = await _controller.UpdateTodoDeadline(1, dto);
+        // Act
+        await Assert.ThrowsAsync<ArgumentException>(() => 
+            _controller.UpdateTodoDeadline(1, dto));
+    }
 
-            // Assert
-            var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-            Assert.Equal("Deadline cannot be in the past", badRequestResult.Value);
-        }
-        catch (ArgumentException ex)
-        {
-            // This is the current behavior - the exception is not handled in the controller
-            Assert.Equal("Deadline cannot be in the past", ex.Message);
-        }
+    /// <summary>
+    /// Tests error handling for non-existent todos in deadline updates.
+    /// Verifies that the controller returns NotFound when
+    /// attempting to update a deadline for a non-existent todo.
+    /// This ensures consistent 404 responses across the API.
+    /// </summary>
+    [Fact]
+    public async Task UpdateTodoDeadline_WithInvalidId_ReturnsNotFound()
+    {
+        // Arrange
+        var deadline = DateTime.Now.AddDays(1);
+        var dto = new DeadlineUpdateDTO(deadline);
+        _mockTodoService.Setup(s => s.UpdateTodoDeadlineAsync(It.IsAny<int>(), It.IsAny<DateTime>()))
+            .ReturnsAsync((Todo?)null);
+
+        // Act
+        var result = await _controller.UpdateTodoDeadline(999, dto);
+
+        // Assert
+        Assert.IsType<NotFoundResult>(result);
     }
 } 

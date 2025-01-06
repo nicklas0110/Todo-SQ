@@ -76,20 +76,36 @@ namespace TodoBackend.Controllers
         }
 
         [HttpPut("{id}/priority")]
-        public async Task<IActionResult> UpdateTodoPriority(int id, [FromBody] PriorityUpdateDTO dto)
+        public async Task<IActionResult> UpdateTodoPriority(int id, PriorityUpdateDTO? dto)
         {
+            if (dto == null)
+            {
+                return BadRequest("Priority update data is required");
+            }
+
             var todo = await _todoService.UpdateTodoPriorityAsync(id, dto.Priority);
             if (todo == null)
+            {
                 return NotFound();
+            }
+
             return Ok(todo);
         }
 
         [HttpPut("{id}/deadline")]
-        public async Task<IActionResult> UpdateTodoDeadline(int id, [FromBody] DeadlineUpdateDTO dto)
+        public async Task<IActionResult> UpdateTodoDeadline(int id, DeadlineUpdateDTO? dto)
         {
+            if (dto == null)
+            {
+                return BadRequest("Deadline update data is required");
+            }
+
             var todo = await _todoService.UpdateTodoDeadlineAsync(id, dto.Deadline);
             if (todo == null)
+            {
                 return NotFound();
+            }
+
             return Ok(todo);
         }
     }
