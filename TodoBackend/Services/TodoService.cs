@@ -29,29 +29,25 @@ namespace TodoBackend.Services
 
         public async Task<Todo> CreateTodoAsync(Todo todo)
         {
+            todo.CreatedAt = DateTime.UtcNow;
             _context.Todos.Add(todo);
             await _context.SaveChangesAsync();
             return todo;
         }
 
-        public async Task<Todo?> UpdateTodoAsync(int id, Todo todo)
+        public async Task<Todo?> UpdateTodoAsync(int id, Todo updatedTodo)
         {
-            if (id != todo.Id)
-                return null;
+            var todo = await _context.Todos.FindAsync(id);
+            if (todo == null) return null;
 
-            _context.Entry(todo).State = EntityState.Modified;
-            
-            try
-            {
-                await _context.SaveChangesAsync();
-                return todo;
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!await TodoExists(id))
-                    return null;
-                throw;
-            }
+            todo.Title = updatedTodo.Title;
+            todo.Priority = updatedTodo.Priority;
+            todo.Deadline = updatedTodo.Deadline;
+            todo.Completed = updatedTodo.Completed;
+            todo.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+            return todo;
         }
 
         public async Task<bool> DeleteTodoAsync(int id)
@@ -63,6 +59,39 @@ namespace TodoBackend.Services
             _context.Todos.Remove(todo);
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<Todo?> UpdateTodoPriorityAsync(int id, Priority priority)
+        {
+            var todo = await _context.Todos.FindAsync(id);
+            if (todo == null) return null;
+
+            todo.Priority = priority;
+            todo.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+            return todo;
+        }
+
+        public async Task<Todo?> UpdateTodoDeadlineAsync(int id, DateTime? deadline)
+        {
+            var todo = await _context.Todos.FindAsync(id);
+            if (todo == null) return null;
+
+            todo.Deadline = deadline;
+            todo.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+            return todo;
+        }
+
+        public async Task<Todo?> UpdateTodoTitleAsync(int id, string title)
+        {
+            var todo = await _context.Todos.FindAsync(id);
+            if (todo == null) return null;
+
+            todo.Title = title;
+            todo.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+            return todo;
         }
 
         private async Task<bool> TodoExists(int id)

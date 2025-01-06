@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using TodoBackend.Models;
 using TodoBackend.Services;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+using TodoBackend.DTOs;
 
 namespace TodoBackend.Controllers
 {
@@ -11,174 +10,66 @@ namespace TodoBackend.Controllers
     public class TodosController : ControllerBase
     {
         private readonly ITodoService _todoService;
-        private readonly ILogger<TodosController> _logger;
 
-        public TodosController(ITodoService todoService, ILogger<TodosController> logger)
+        public TodosController(ITodoService todoService)
         {
             _todoService = todoService;
-            _logger = logger;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Todo>>> GetTodos()
         {
-            try
-            {
-                var todos = await _todoService.GetAllTodosAsync();
-                return Ok(todos);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting todos");
-                return StatusCode(500, new { error = ex.Message });
-            }
+            var todos = await _todoService.GetAllTodosAsync();
+            return Ok(todos);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Todo>> GetTodo(int id)
+        {
+            var todo = await _todoService.GetTodoByIdAsync(id);
+            return todo == null ? NotFound() : Ok(todo);
         }
 
         [HttpPost]
-        public async Task<ActionResult<Todo>> CreateTodo([FromBody] Todo todo)
+        public async Task<ActionResult<Todo>> CreateTodo(Todo todo)
         {
-            try
-            {
-                if (todo == null)
-                    return BadRequest(new { error = "Todo is null" });
-
-                _logger.LogInformation("Received todo: {Todo}", JsonSerializer.Serialize(todo));
-
-                // Set default values
-                todo.CreatedAt = DateTime.UtcNow;
-                todo.Completed = false;
-                if (todo.Priority == 0) // If not set
-                    todo.Priority = Priority.Low;
-
-                var createdTodo = await _todoService.CreateTodoAsync(todo);
-                return CreatedAtAction(nameof(GetTodos), new { id = createdTodo.Id }, createdTodo);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating todo");
-                return StatusCode(500, new { error = ex.Message });
-            }
+            var createdTodo = await _todoService.CreateTodoAsync(todo);
+            return CreatedAtAction(nameof(GetTodo), new { id = createdTodo.Id }, createdTodo);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateTodo(int id, [FromBody] Todo todo)
+        public async Task<ActionResult<Todo>> UpdateTodo(int id, Todo todo)
         {
-            try
-            {
-                if (id != todo.Id)
-                    return BadRequest(new { error = "Id mismatch" });
-
-                var updatedTodo = await _todoService.UpdateTodoAsync(id, todo);
-                if (updatedTodo == null)
-                    return NotFound(new { error = "Todo not found" });
-
-                return Ok(updatedTodo);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating todo");
-                return StatusCode(500, new { error = ex.Message });
-            }
+            var result = await _todoService.UpdateTodoAsync(id, todo);
+            return result == null ? NotFound() : Ok(result);
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteTodo(int id)
+        public async Task<ActionResult> DeleteTodo(int id)
         {
-            try
-            {
-                var result = await _todoService.DeleteTodoAsync(id);
-                if (!result)
-                    return NotFound(new { error = "Todo not found" });
-
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error deleting todo");
-                return StatusCode(500, new { error = ex.Message });
-            }
-        }
-
-        [HttpPut("{id}/priority")]
-        public async Task<ActionResult<Todo>> UpdatePriority(int id, [FromBody] PriorityUpdateDto priorityUpdate)
-        {
-            try
-            {
-                var todo = await _todoService.GetTodoByIdAsync(id);
-                if (todo == null)
-                    return NotFound(new { error = "Todo not found" });
-
-                todo.Priority = priorityUpdate.Priority;
-                var updatedTodo = await _todoService.UpdateTodoAsync(id, todo);
-                
-                return Ok(updatedTodo);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating todo priority");
-                return StatusCode(500, new { error = ex.Message });
-            }
-        }
-
-        [HttpPut("{id}/deadline")]
-        public async Task<ActionResult<Todo>> UpdateDeadline(int id, [FromBody] DeadlineUpdateDto deadlineUpdate)
-        {
-            try
-            {
-                var todo = await _todoService.GetTodoByIdAsync(id);
-                if (todo == null)
-                    return NotFound(new { error = "Todo not found" });
-
-                todo.Deadline = deadlineUpdate.Deadline;
-                todo.UpdatedAt = DateTime.UtcNow;
-                var updatedTodo = await _todoService.UpdateTodoAsync(id, todo);
-                
-                return Ok(updatedTodo);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating todo deadline");
-                return StatusCode(500, new { error = ex.Message });
-            }
+            var result = await _todoService.DeleteTodoAsync(id);
+            return result ? NoContent() : NotFound();
         }
 
         [HttpPut("{id}/title")]
-        public async Task<ActionResult<Todo>> UpdateTitle(int id, [FromBody] TitleUpdateDto titleUpdate)
+        public async Task<ActionResult<Todo>> UpdateTitle(int id, TitleUpdateDto dto)
         {
-            try
-            {
-                var todo = await _todoService.GetTodoByIdAsync(id);
-                if (todo == null)
-                    return NotFound(new { error = "Todo not found" });
-
-                todo.Title = titleUpdate.Title;
-                todo.UpdatedAt = DateTime.UtcNow;
-                var updatedTodo = await _todoService.UpdateTodoAsync(id, todo);
-                
-                return Ok(updatedTodo);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating todo title");
-                return StatusCode(500, new { error = ex.Message });
-            }
+            var result = await _todoService.UpdateTodoTitleAsync(id, dto.Title);
+            return result == null ? NotFound() : Ok(result);
         }
 
-        public class PriorityUpdateDto
+        [HttpPut("{id}/priority")]
+        public async Task<ActionResult<Todo>> UpdatePriority(int id, PriorityUpdateDto dto)
         {
-            public Priority Priority { get; set; }
+            var result = await _todoService.UpdateTodoPriorityAsync(id, dto.Priority);
+            return result == null ? NotFound() : Ok(result);
         }
 
-        public class DeadlineUpdateDto
+        [HttpPut("{id}/deadline")]
+        public async Task<ActionResult<Todo>> UpdateDeadline(int id, DeadlineUpdateDto dto)
         {
-            [JsonPropertyName("deadline")]
-            public DateTime? Deadline { get; set; }
-        }
-
-        public class TitleUpdateDto
-        {
-            [JsonPropertyName("title")]
-            public string Title { get; set; } = string.Empty;
+            var result = await _todoService.UpdateTodoDeadlineAsync(id, dto.Deadline);
+            return result == null ? NotFound() : Ok(result);
         }
     }
 } 

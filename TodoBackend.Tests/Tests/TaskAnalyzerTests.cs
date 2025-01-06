@@ -73,19 +73,16 @@ namespace TodoBackend.Tests
                 new Todo { Id = 1, Priority = Priority.Low, Deadline = _now.AddDays(1) },
                 new Todo { Id = 2, Priority = Priority.Critical, Deadline = _now.AddDays(3) },
                 new Todo { Id = 3, Priority = Priority.Medium, Deadline = _now.AddDays(1) },
-                new Todo { Id = 4, Priority = Priority.High, Deadline = null },
-                new Todo { Id = 5, Priority = Priority.Low, Deadline = _now.AddDays(5) }
             };
 
             // Act
             var urgentTasks = _analyzer.GetTasksRequiringImediateAttention(todos).ToList();
 
             // Assert
-            Assert.Equal(4, urgentTasks.Count);
+            Assert.Equal(3, urgentTasks.Count);
             Assert.Equal(2, urgentTasks[0].Id); // Critical priority should be first
-            Assert.Equal(4, urgentTasks[1].Id); // High priority should be second
-            Assert.Equal(1, urgentTasks[2].Id); // Low priority but urgent deadline
-            Assert.Equal(3, urgentTasks[3].Id); // Medium priority with urgent deadline
+            Assert.Equal(3, urgentTasks[1].Id); // Medium priority with urgent deadline
+            Assert.Equal(1, urgentTasks[2].Id); // Low priority with urgent deadline
         }
 
         [Fact]

@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TodoBackend", "TodoBackend\TodoBackend.csproj", "{A3AEEAF2-CD05-46E9-A19E-262372C3611B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TodoBackend.Tests", "TodoBackend.Tests\TodoBackend.Tests.csproj", "{11A90AA0-4DC5-4B95-BEDD-01337C8060B3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A3AEEAF2-CD05-46E9-A19E-262372C3611B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3AEEAF2-CD05-46E9-A19E-262372C3611B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3AEEAF2-CD05-46E9-A19E-262372C3611B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3AEEAF2-CD05-46E9-A19E-262372C3611B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11A90AA0-4DC5-4B95-BEDD-01337C8060B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11A90AA0-4DC5-4B95-BEDD-01337C8060B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11A90AA0-4DC5-4B95-BEDD-01337C8060B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11A90AA0-4DC5-4B95-BEDD-01337C8060B3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
