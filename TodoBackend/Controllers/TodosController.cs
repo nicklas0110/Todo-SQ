@@ -6,7 +6,7 @@ using TodoBackend.DTOs;
 namespace TodoBackend.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/todos")]
     public class TodosController : ControllerBase
     {
         private readonly ITodoService _todoService;
@@ -24,17 +24,26 @@ namespace TodoBackend.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Todo>> GetTodo(int id)
+        public async Task<IActionResult> GetTodo(int id)
         {
             var todo = await _todoService.GetTodoByIdAsync(id);
-            return todo == null ? NotFound() : Ok(todo);
+            if (todo == null)
+                return NotFound();
+            return Ok(todo);
         }
 
         [HttpPost]
-        public async Task<ActionResult<Todo>> CreateTodo(Todo todo)
+        public async Task<IActionResult> CreateTodo([FromBody] CreateTodoDTO dto)
         {
-            var createdTodo = await _todoService.CreateTodoAsync(todo);
-            return CreatedAtAction(nameof(GetTodo), new { id = createdTodo.Id }, createdTodo);
+            var todo = new Todo
+            {
+                Title = dto.Title,
+                Priority = dto.Priority,
+                Deadline = dto.Deadline
+            };
+
+            var created = await _todoService.CreateTodoAsync(todo);
+            return CreatedAtAction(nameof(GetTodo), new { id = created.Id }, created);
         }
 
         [HttpPut("{id}")]
@@ -52,24 +61,30 @@ namespace TodoBackend.Controllers
         }
 
         [HttpPut("{id}/title")]
-        public async Task<ActionResult<Todo>> UpdateTitle(int id, TitleUpdateDto dto)
+        public async Task<IActionResult> UpdateTodoTitle(int id, [FromBody] TitleUpdateDTO dto)
         {
-            var result = await _todoService.UpdateTodoTitleAsync(id, dto.Title);
-            return result == null ? NotFound() : Ok(result);
+            var todo = await _todoService.UpdateTodoTitleAsync(id, dto.Title);
+            if (todo == null)
+                return NotFound();
+            return Ok(todo);
         }
 
         [HttpPut("{id}/priority")]
-        public async Task<ActionResult<Todo>> UpdatePriority(int id, PriorityUpdateDto dto)
+        public async Task<IActionResult> UpdateTodoPriority(int id, [FromBody] PriorityUpdateDTO dto)
         {
-            var result = await _todoService.UpdateTodoPriorityAsync(id, dto.Priority);
-            return result == null ? NotFound() : Ok(result);
+            var todo = await _todoService.UpdateTodoPriorityAsync(id, dto.Priority);
+            if (todo == null)
+                return NotFound();
+            return Ok(todo);
         }
 
         [HttpPut("{id}/deadline")]
-        public async Task<ActionResult<Todo>> UpdateDeadline(int id, DeadlineUpdateDto dto)
+        public async Task<IActionResult> UpdateTodoDeadline(int id, [FromBody] DeadlineUpdateDTO dto)
         {
-            var result = await _todoService.UpdateTodoDeadlineAsync(id, dto.Deadline);
-            return result == null ? NotFound() : Ok(result);
+            var todo = await _todoService.UpdateTodoDeadlineAsync(id, dto.Deadline);
+            if (todo == null)
+                return NotFound();
+            return Ok(todo);
         }
     }
 } 

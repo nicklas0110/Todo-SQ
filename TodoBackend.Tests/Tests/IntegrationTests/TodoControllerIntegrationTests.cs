@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit;
 using TodoBackend.Models;
@@ -15,10 +16,12 @@ namespace TodoBackend.Tests.IntegrationTests
     public class TodoControllerIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     {
         private readonly HttpClient _client;
+        private readonly string _baseUrl = "api/todos";
+        private readonly WebApplicationFactory<Program> _factory;
 
         public TodoControllerIntegrationTests(WebApplicationFactory<Program> factory)
         {
-            _client = factory.WithWebHostBuilder(builder =>
+            _factory = factory.WithWebHostBuilder(builder =>
             {
                 builder.ConfigureServices(services =>
                 {
@@ -32,10 +35,27 @@ namespace TodoBackend.Tests.IntegrationTests
 
                     services.AddDbContext<TodoDbContext>(options =>
                     {
-                        options.UseInMemoryDatabase("TestDb_" + Guid.NewGuid().ToString());
+                        options.UseInMemoryDatabase("TestingDb");
                     });
                 });
-            }).CreateClient();
+            });
+
+            _client = _factory.CreateClient();
+        }
+
+        private async Task<Todo> CreateTestTodo()
+        {
+            var newTodo = new CreateTodoDTO
+            {
+                Title = "Test Todo",
+                Priority = Priority.Low
+            };
+            
+            var createResponse = await _client.PostAsJsonAsync(_baseUrl, newTodo);
+            createResponse.StatusCode.Should().Be(HttpStatusCode.Created);
+            var todo = await createResponse.Content.ReadFromJsonAsync<Todo>();
+            todo.Should().NotBeNull();
+            return todo!;
         }
 
         [Fact]
@@ -89,64 +109,61 @@ namespace TodoBackend.Tests.IntegrationTests
         }
 
         [Fact]
-        public async Task UpdateTodoTitle_ReturnsUpdatedTodo()
+        public async Task UpdateTodoTitle_ShouldUpdateTitle()
         {
-            // Create a new todo first
-            var newTodo = new Todo { Title = "Test Todo" };
-            var createResponse = await _client.PostAsJsonAsync("/api/todos", newTodo);
-            var createdTodo = await createResponse.Content.ReadFromJsonAsync<Todo>();
-            Assert.NotNull(createdTodo);
+            // Arrange
+            var todo = await CreateTestTodo();
 
-            // Update the title using PUT instead of PATCH
-            var titleUpdate = new TitleUpdateDto("Updated Title");
-            var response = await _client.PutAsJsonAsync($"/api/todos/{createdTodo.Id}/title", titleUpdate);
+            // Act
+            var response = await _client.PutAsync(
+                $"{_baseUrl}/{todo.Id}/title",
+                JsonContent.Create(new TitleUpdateDTO("Updated Title"))
+            );
 
             // Assert
-            response.EnsureSuccessStatusCode();
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
             var updatedTodo = await response.Content.ReadFromJsonAsync<Todo>();
-            Assert.NotNull(updatedTodo);
-            Assert.Equal("Updated Title", updatedTodo.Title);
+            updatedTodo.Should().NotBeNull();
+            updatedTodo!.Title.Should().Be("Updated Title");
         }
 
         [Fact]
-        public async Task UpdateTodoPriority_ReturnsUpdatedTodo()
+        public async Task UpdateTodoPriority_ShouldUpdatePriority()
         {
-            // Create a new todo first
-            var newTodo = new Todo { Title = "Test Todo" };
-            var createResponse = await _client.PostAsJsonAsync("/api/todos", newTodo);
-            var createdTodo = await createResponse.Content.ReadFromJsonAsync<Todo>();
-            Assert.NotNull(createdTodo);
+            // Arrange
+            var todo = await CreateTestTodo();
 
-            // Update the priority using PUT instead of PATCH
-            var priorityUpdate = new PriorityUpdateDto(Priority.High);
-            var response = await _client.PutAsJsonAsync($"/api/todos/{createdTodo.Id}/priority", priorityUpdate);
+            // Act
+            var response = await _client.PutAsync(
+                $"{_baseUrl}/{todo.Id}/priority",
+                JsonContent.Create(new PriorityUpdateDTO(Priority.High))
+            );
 
             // Assert
-            response.EnsureSuccessStatusCode();
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
             var updatedTodo = await response.Content.ReadFromJsonAsync<Todo>();
-            Assert.NotNull(updatedTodo);
-            Assert.Equal(Priority.High, updatedTodo.Priority);
+            updatedTodo.Should().NotBeNull();
+            updatedTodo!.Priority.Should().Be(Priority.High);
         }
 
         [Fact]
-        public async Task UpdateTodoDeadline_ReturnsUpdatedTodo()
+        public async Task UpdateTodoDeadline_ShouldUpdateDeadline()
         {
-            // Create a new todo first
-            var newTodo = new Todo { Title = "Test Todo" };
-            var createResponse = await _client.PostAsJsonAsync("/api/todos", newTodo);
-            var createdTodo = await createResponse.Content.ReadFromJsonAsync<Todo>();
-            Assert.NotNull(createdTodo);
+            // Arrange
+            var todo = await CreateTestTodo();
+            var newDeadline = DateTime.UtcNow.Date.AddDays(1);
 
-            // Update the deadline using PUT instead of PATCH
-            var deadline = DateTime.UtcNow.AddDays(1);
-            var deadlineUpdate = new DeadlineUpdateDto(deadline);
-            var response = await _client.PutAsJsonAsync($"/api/todos/{createdTodo.Id}/deadline", deadlineUpdate);
+            // Act
+            var response = await _client.PutAsync(
+                $"{_baseUrl}/{todo.Id}/deadline",
+                JsonContent.Create(new DeadlineUpdateDTO(newDeadline))
+            );
 
             // Assert
-            response.EnsureSuccessStatusCode();
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
             var updatedTodo = await response.Content.ReadFromJsonAsync<Todo>();
-            Assert.NotNull(updatedTodo);
-            Assert.Equal(deadline.Date, updatedTodo.Deadline?.Date);
+            updatedTodo.Should().NotBeNull();
+            updatedTodo!.Deadline.Should().Be(newDeadline);
         }
     }
 } 
