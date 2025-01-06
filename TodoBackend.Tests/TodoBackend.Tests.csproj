@@ -23,6 +23,14 @@
     <PackageReference Include="SpecFlow" Version="3.9.74" />
     <PackageReference Include="SpecFlow.xUnit" Version="3.9.74" />
     <PackageReference Include="SpecFlow.Tools.MsBuild.Generation" Version="3.9.74" />
+    <PackageReference Include="coverlet.collector" Version="6.0.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="coverlet.msbuild" Version="6.0.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
@@ -34,5 +42,19 @@
     <EmbeddedResource Remove="obj\**" />
     <None Remove="obj\**" />
   </ItemGroup>
+
+  <PropertyGroup>
+    <CollectCoverage>true</CollectCoverage>
+    <CoverletOutputFormat>cobertura,lcov</CoverletOutputFormat>
+    <CoverletOutput>./TestResults/coverage/</CoverletOutput>
+    <Include>[TodoBackend]*</Include>
+    <Exclude>[TodoBackend.Tests]*</Exclude>
+    <ExcludeByFile>**/Migrations/*.cs</ExcludeByFile>
+    <IncludeTestAssembly>false</IncludeTestAssembly>
+    <SingleHit>true</SingleHit>
+    <ThresholdType>line,branch,method</ThresholdType>
+    <ThresholdStat>minimum</ThresholdStat>
+    <Threshold>80</Threshold>
+  </PropertyGroup>
 
 </Project> 
